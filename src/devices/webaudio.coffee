@@ -13,21 +13,21 @@ class WebAudioDevice extends EventEmitter
     
     # Chrome limits the number of AudioContexts that one can create,
     # so use a lazily created shared context for all playback
-    sharedContext = null
+    # window.sharedAudioContext = null
     
     constructor: (@sampleRate, @channels) ->
-        @context = sharedContext ?= new AudioContext
+        @context = window.sharedAudioContext ?= new AudioContext
         @deviceSampleRate = @context.sampleRate
         
         # calculate the buffer size to read
-        @bufferSize = Math.ceil(4096 / (@deviceSampleRate / @sampleRate) * @channels)
+        @bufferSize = Math.ceil(1024 / (@deviceSampleRate / @sampleRate) * @channels)
         @bufferSize += @bufferSize % @channels
         
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
-            @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, @bufferSize)
+            @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, 1024 * @channels)
 
-        @node = @context[createProcessor](4096, @channels, @channels)
+        @node = window.sharedAudioNode || @context[createProcessor](1024, @channels, @channels)
         @node.onaudioprocess = @refill
         @node.connect(@context.destination)
         
@@ -48,6 +48,7 @@ class WebAudioDevice extends EventEmitter
         if @resampler
             data = @resampler.resampler(data)
         
+        # console.log "#{outputBuffer.length}"
         # write data to output
         for i in [0...outputBuffer.length] by 1
             for n in [0...channelCount] by 1

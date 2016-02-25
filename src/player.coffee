@@ -33,7 +33,11 @@ class Player extends EventEmitter
         
         @asset.on 'decodeStart', =>
             @queue = new Queue(@asset)
-            @queue.once 'ready', @startPlaying
+            @queue.once 'ready', =>
+                setInterval =>
+                    @asset.decodePacket()
+                # , 2000
+                @startPlaying()
             
         @asset.on 'format', (@format) =>
             @emit 'format', @format
@@ -114,6 +118,8 @@ class Player extends EventEmitter
         @device = new AudioDevice(@format.sampleRate, @format.channelsPerFrame)
         @device.on 'timeUpdate', (@currentTime) =>
             @emit 'progress', @currentTime
+        @device.on 'refilled', (data) =>
+            @emit 'refilled', data
         
         @refill = (buffer) =>
             return unless @playing
