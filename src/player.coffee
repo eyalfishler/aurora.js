@@ -112,7 +112,7 @@ class Player extends EventEmitter
         return @currentTime
         
     startPlaying: =>
-        frame = @queue.read()
+        frame = @queue?.read()
         frameOffset = 0
         
         @device = new AudioDevice(@format.sampleRate, @format.channelsPerFrame)
@@ -123,6 +123,10 @@ class Player extends EventEmitter
         
         @refill = (buffer) =>
             return unless @playing
+
+            if typeof @externalRefill is 'function'
+                # use external refill if needed
+                return @externalRefill buffer
             
             # try reading another frame if one isn't already available
             # happens when we play to the end and then seek back

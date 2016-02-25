@@ -25,6 +25,8 @@ class AudioDevice extends EventEmitter
         @_timer = setInterval @updateTime, 200
         @device.on 'refill', @refill = (buffer) =>
             @emit 'refill', buffer
+        @device.on 'refilled', @refilled = (buffer) =>
+            @emit 'refilled', buffer
         
     stop: ->
         return unless @playing
