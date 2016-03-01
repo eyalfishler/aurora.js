@@ -1,6 +1,8 @@
 EventEmitter = require '../core/events'
 AudioDevice = require '../device'
 
+BUFFER_SIZE = 4096
+
 class VirtualDevice extends EventEmitter
     AudioDevice.register(VirtualDevice)
     
@@ -8,7 +10,7 @@ class VirtualDevice extends EventEmitter
 
     constructor: (@sampleRate, @channels) ->
 
-        @bufferSize = Math.ceil(1024 / (self.deviceSampleRate / @sampleRate) * @channels)
+        @bufferSize = Math.ceil(BUFFER_SIZE / (self.deviceSampleRate / @sampleRate) * @channels)
         @bufferSize += @bufferSize % @channels
 
         setInterval =>
