@@ -2,6 +2,8 @@ EventEmitter = require '../core/events'
 AudioDevice = require '../device'
 Resampler = require './resampler'
 
+BUFFER_SIZE = 4096
+
 class WebAudioDevice extends EventEmitter
     AudioDevice.register(WebAudioDevice)
     
@@ -20,14 +22,14 @@ class WebAudioDevice extends EventEmitter
         @deviceSampleRate = @context.sampleRate
         
         # calculate the buffer size to read
-        @bufferSize = Math.ceil(1024 / (@deviceSampleRate / @sampleRate) * @channels)
+        @bufferSize = Math.ceil(BUFFER_SIZE / (@deviceSampleRate / @sampleRate) * @channels)
         @bufferSize += @bufferSize % @channels
         
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
-            @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, 1024 * @channels)
+            @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, BUFFER_SIZE * @channels)
 
-        @node = window.sharedAudioNode || @context[createProcessor](1024, @channels, @channels)
+        @node = window.sharedAudioNode || @context[createProcessor](BUFFER_SIZE, @channels, @channels)
         @node.onaudioprocess = @refill
         @node.connect(@context.destination)
         

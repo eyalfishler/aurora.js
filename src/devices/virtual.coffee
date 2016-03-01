@@ -13,7 +13,7 @@ class VirtualDevice extends EventEmitter
 
         setInterval =>
             @refill()
-        , 10
+        , 50
 
     refill: =>
 
